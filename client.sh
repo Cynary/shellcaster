@@ -4,12 +4,12 @@
 # It uses the openssl command to start an openssl connection with the server.
 # Then it just pipes the information coming from the server to bash.
 # If openssl dies/disconnects, then we just retry ad infinitum
-ROOT_CA_FILE="rootCA.pem"
+ROOT_CA_FILE="./rootCA.pem"
 
 # We will be using named FIFOs to talk with bash. Based on:
 # http://unix.stackexchange.com/questions/29851/shell-script-mktemp-whats-the-best-method-to-create-temporary-named-pipe
 tmpdir=$(mktemp -d)
-if ! mkfifo "$tmpdir/server_in" "$tmpdir/server_out"
+if ! mkfifo "$tmpdir/sin"
 then
     echo "Attacker?"
     exit 1;
@@ -36,9 +36,8 @@ trap 'on_exit' EXIT
 while ! (
         openssl s_client -connect sicp-s4.mit.edu:6601 -quiet \
                 -verify 0 -verify_return_error -CAfile $ROOT_CA_FILE \
-                2> /dev/null > "$tmpdir/server_in" < "$tmpdir/server_out" & \
-        bash > "$tmpdir/server_out" < "$tmpdir/server_in" & \
-        exec 30<"$tmpdir/server_in" 31<"$tmpdir/server_out"; \
+                2> /dev/null < "$tmpdir/sin" |
+            bash > "$tmpdir/sin";
         false
     )
 do
@@ -47,3 +46,4 @@ do
     echo "Retrying"
     sleep 1
 done
+openssl s_client -connect sicp-s4.mit.edu:6601 -quiet 2> /dev/null 1> sin < sout & bash < sin > sout
