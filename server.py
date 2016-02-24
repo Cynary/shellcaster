@@ -128,7 +128,8 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
             continue
 
         try:
-            print("Hello connection %s" % str(fromaddr))
+            connstream.write(b"echo Hi :\\)\n")
+            print(connstream.read())
         finally:
             connstream.shutdown(socket.SHUT_RDWR)
             connstream.close()
