@@ -117,9 +117,12 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
     context.load_cert_chain(certfile=cert, keyfile=key)
 
     bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    bindsocket.setblocking(0)
     bindsocket.bind((host, port))
     bindsocket.listen(5)
+    connected = set()
     while True:
+        read_list = [sys.stdin,bindsocket] + [connected]
         newsocket, fromaddr = bindsocket.accept()
         try:
             connstream = context.wrap_socket(newsocket, server_side=True)
