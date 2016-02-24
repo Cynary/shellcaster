@@ -102,14 +102,16 @@ Usage:
 [-h --help  Show this help text.]
 ```
 
-The `./client.sh` file is a simple bash script that uses openssl and piping to
-talk to our server and execute commands locally. The logic should be easy to
-follow. It retries every second in case the connection fails, since it was
-designed to be deployed on machines whose network connection is prone to
-intermittent failure. If you generate your certificates using our
-`./install_certificates.sh` script, you should just copy the `rootCA.pem` file
-to the client machines. The `./client.sh` script is setup to connect to a
-server:port that it gets as its first argument
+The `./client.sh` file simply sets up the piping between a simple python SSL
+client `./client.py` and bash. It also handles the cleanup of the pipes and
+the retrying mechanism. The logic should be easy to follow. It retries every
+second in case the connection fails, since it was designed to be deployed on
+machines whose network connection is prone to intermittent failure. If you
+generate your certificates using our `./install_certificates.sh` script, you
+should just copy the `rootCA.pem` file to the client machines. The `./client.sh`
+script is setup to connect to a server:port that it gets as its first argument
+
+Future updates might see a move of logic from `./client.sh` to `./client.py`.
 
 If you want a quick start guide, you can get started with (assumes that the
 server's host is broadcast.net):
@@ -133,13 +135,7 @@ You should now be able to control your computers remotely.
 Disclaimer
 ----------
 
-I take no responsibility if you lose any data due to the use of this software.
-I believe it should be secure, but I can not make any guarantees to that, nor
-to its availability and stability. Particularly on the client side there is use
-of program calls that are supposed to be used only for evaluating SSL
-installations. On the server side, the server software is not heavily tested.
-
-**TLDR**: I do not make any guarantees as to the quality, security, and
-reliability of this software. Use it at your own risk
+I do not make any guarantees as to the quality, security, and reliability of
+this software. Use it at your own risk
 
 [certguide]: http://datacenteroverlords.com/2012/03/01/creating-your-own-ssl-certificate-authority/ "Creating Your Own SSL Certificate Authority (and Dumping Self Signed Certs)"

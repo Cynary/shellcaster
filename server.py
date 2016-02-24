@@ -66,9 +66,9 @@ def main(argv):
                        for opt_name, opt in options)
     if 'help' in server_args:
         usage(out=sys.stdout)
+        return 0
     else:
-        start_server(**server_args)
-    sys.exit(0)
+        return start_server(**server_args)
 
 
 def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
@@ -104,10 +104,10 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
     except ValueError:
         print("Port number must be integer")
         usage()
-        sys.exit(2)
+        return 2
     except getopt.GetoptError:
         usage()
-        sys.exit(2)
+        return 2
 
     print("Starting server at %s:%d\n"
           "Certificate: %s\tKey: %s%s" %
@@ -175,4 +175,4 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
             c.shutdown(socket.SHUT_RDWR)
             c.close()
 
-main(argv)
+sys.exit(main(argv))

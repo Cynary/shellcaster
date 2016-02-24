@@ -15,7 +15,7 @@ case $# in
         ;;
     *)
         HOST=$1
-        ROOT_CA_FILE=$1
+        ROOT_CA_FILE=$2
         ;;
 esac
 
@@ -46,10 +46,7 @@ trap 'on_exit' EXIT
 
 while true
 do
-    openssl s_client -connect $HOST -quiet \
-            -verify 0 -verify_return_error -CAfile $ROOT_CA_FILE \
-            2> /dev/null < "$tmpdir/sin" | \
-        bash > "$tmpdir/sin"
+    ./client.py $HOST $ROOT_CA_FILE < "$tmpdir/sin" | bash > "$tmpdir/sin"
     # Retry every second
     # Assumes temporary internet shortage.
     echo "Retrying"
