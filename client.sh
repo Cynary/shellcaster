@@ -31,7 +31,10 @@ fi
 function on_exit()
 {
     echo "Cleaning up FIFOs and children"
-    kill `jobs -p`
+    for j in `jobs -p`
+    do
+        kill $j
+    done
     rm -rf "$tmpdir"
     exit 0
 }
