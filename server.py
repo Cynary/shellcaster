@@ -159,6 +159,11 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                               "in this case", file=sys.stderr)
                         connected.remove(r)
                         continue
+                    except ConnectionResetError:
+                        print("Unsure why this happens, we just cleanly remove "
+                              "the socket from our queue in this case.",
+                              file=sys.stderr)
+                        connected.remove(r)
                     if o == b'':
                         print("Socket closed connection.", file=sys.stderr)
                         connected.remove(r)
