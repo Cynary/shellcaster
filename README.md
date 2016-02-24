@@ -130,4 +130,16 @@ directory you're working in now.
 
 You should now be able to control your computers remotely.
 
+Disclaimer
+----------
+
+I take no responsibility if you lose any data due to the use of this software.
+I believe it should be secure, but I can not make any guarantees to that, nor
+to its availability and stability. Particularly on the client side there is use
+of program calls that are supposed to be used only for evaluating SSL
+installations. On the server side, the server software is not heavily tested.
+
+**TLDR**: I do not make any guarantees as to the quality, security, and
+reliability of this software. Use it at your own risk
+
 [certguide]: http://datacenteroverlords.com/2012/03/01/creating-your-own-ssl-certificate-authority/ "Creating Your Own SSL Certificate Authority (and Dumping Self Signed Certs)"
