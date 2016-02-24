@@ -77,6 +77,14 @@ If you need your certificate files that are in confidential back from the
 encrypted archive, you can run `./decrypt.sh` to decrypt them (it will ask
 you for the same passphrase you used when running `./install_certificates.sh`).
 
+Make sure that the information on your certificates differs from the one on
+your Certificate Authority, otherwise the connection will fail due to self
+signed certificates.
+
+During the filling out of information for your server certificate you will be
+asked to optionally fill out a password and optional company name. You are not
+required to do this.
+
 Usage
 -----
 

@@ -8,6 +8,7 @@ ROOT_CA_FILE="./rootCA.pem"
 case $# in
     0)
         echo "Need HOST:PORT as first argument"
+        exit 1
         ;;
     1)
         HOST=$1
@@ -45,7 +46,7 @@ trap 'on_exit' EXIT
 
 while true
 do
-    openssl s_client -connect sicp-s4.mit.edu:6601 -quiet \
+    openssl s_client -connect $HOST -quiet \
             -verify 0 -verify_return_error -CAfile $ROOT_CA_FILE \
             2> /dev/null < "$tmpdir/sin" | \
         bash > "$tmpdir/sin"
