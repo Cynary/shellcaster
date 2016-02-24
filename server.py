@@ -123,7 +123,7 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
         newsocket, fromaddr = bindsocket.accept()
         try:
             connstream = context.wrap_socket(newsocket, server_side=True)
-        except ssl.SSLEOFError:
+        except (ssl.SSLEOFError, ssl.SSLError):
             print("Bad SSL connection")
             continue
 
