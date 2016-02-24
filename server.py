@@ -4,6 +4,7 @@ import socket
 import ssl
 import getopt
 import os
+import select
 
 DEFAULT_PORT = 6601
 DEFAULT_CAFILE = None
@@ -117,24 +118,57 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
     context.load_cert_chain(certfile=cert, keyfile=key)
 
     bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    bindsocket.setblocking(0)
+    bindsocket.setblocking(False)
     bindsocket.bind((host, port))
     bindsocket.listen(5)
     connected = set()
-    while True:
-        read_list = [sys.stdin,bindsocket] + [connected]
-        newsocket, fromaddr = bindsocket.accept()
-        try:
-            connstream = context.wrap_socket(newsocket, server_side=True)
-        except (ssl.SSLEOFError, ssl.SSLError):
-            print("Bad SSL connection")
-            continue
+    try:
+        while True:
+            read_list = [sys.stdin, bindsocket] + list(connected)
+            readable, _, _ = select.select(read_list, [], [])
+            for r in readable:
+                if r == sys.stdin:
+                    message = sys.stdin.readline()
+                    if message == '':
+                        return
+                    for c in connected:
+                        c.send(bytes(message, 'UTF-8'))
+                elif r == bindsocket:
+                    print("Connection received.")
+                    try:
+                        conn, fromaddr = bindsocket.accept()
+                    except socket.error:
+                        print("Fast client there")
+                        continue
+                    conn.setblocking(True)
+                    try:
+                        ssl_conn = context.wrap_socket(conn, server_side=True)
+                        connected.add(ssl_conn)
+                    except (ssl.SSLEOFError, ssl.SSLError,
+                            ConnectionResetError):
+                        print("Bad SSL connection.")
+                else:
+                    print("Data received from socket.")
+                    try:
+                        o = r.read()
+                    except ValueError:
+                        print("This can rarely happen if someone closes "
+                              "connection during accept or handshake start.")
+                        print("Seems to be a bug with SSL or sockets.")
+                        print("We are just removing the socket from our queue "
+                              "in this case")
+                        connected.remove(r)
+                        continue
+                    if o == b'':
+                        print("Socket closed connection.")
+                        connected.remove(r)
+                        r.shutdown(socket.SHUT_RDWR)
+                        r.close()
 
-        try:
-            connstream.write(b"echo Hi :\\)\n")
-            print(connstream.read())
-        finally:
-            connstream.shutdown(socket.SHUT_RDWR)
-            connstream.close()
+    finally:
+        print("Cleaning up connections.")
+        for c in connected:
+            c.shutdown(socket.SHUT_RDWR)
+            c.close()
 
 main(argv)
