@@ -72,7 +72,7 @@ def main(argv):
 
 
 def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
-                 ca=None, port=DEFAULT_PORT, host=DEFAULT_HOST):
+                 ca=DEFAULT_CAFILE, port=DEFAULT_PORT, host=DEFAULT_HOST):
     try:
         port = int(port)
         error = False
