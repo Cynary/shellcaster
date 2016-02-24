@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 import sys
-import socket, ssl
+import socket
+import ssl
 import getopt
 import os
-from collections import defaultdict
 
-DEFAULT_PORT=601
-DEFAULT_CAFILE=None
-DEFAULT_CERTFILE=None
-DEFAULT_KEY=None
-DEFAULT_HOST=''
+DEFAULT_PORT = 6601
+DEFAULT_CAFILE = None
+DEFAULT_CERTFILE = None
+DEFAULT_KEY = None
+DEFAULT_HOST = ''
 
-NAME=sys.argv[0]
+NAME = sys.argv[0]
 argv = sys.argv[1:]
+
 
 def usage(out=sys.stderr):
     global NAME
@@ -24,7 +25,7 @@ def usage(out=sys.stderr):
     [-a\t--ca\tLocation of Certificate Authority file.]
     [--host\tHost the server should bind to.]
     -h\t--help\t
-''' % NAME,file=out)
+''' % NAME, file=out)
 
 opt_to_names = {
     '-p': 'port',
@@ -38,18 +39,20 @@ opt_to_names = {
     '--key': 'key',
     '--help': 'help'
 }
-SHORT_OPTIONS='p:c:a:k:h'
-LONG_OPTIONS=['port=','cert=','ca=','key=','help','host=']
+SHORT_OPTIONS = 'p:c:a:k:h'
+LONG_OPTIONS = ['port=', 'cert=', 'ca=', 'key=', 'help', 'host=']
+
 
 def main(argv):
     try:
-        options,argv = getopt.gnu_getopt(argv,SHORT_OPTIONS,LONG_OPTIONS)
+        options, argv = getopt.gnu_getopt(argv, SHORT_OPTIONS, LONG_OPTIONS)
     except getopt.GetoptError:
         usage()
         sys.exit(2)
 
-    parse_opt = lambda x: x if x[-1] != '=' else x[:-1]
-    opt_to_names = {'--' + parse_opt(opt) : parse_opt(opt) \
+    def parse_opt(x):
+        return x if x[-1] != '=' else x[:-1]
+    opt_to_names = {'--' + parse_opt(opt): parse_opt(opt)
                     for opt in LONG_OPTIONS}
     long_ind = 0
     for i in SHORT_OPTIONS:
@@ -58,34 +61,36 @@ def main(argv):
         opt_to_names['-'+i] = parse_opt(LONG_OPTIONS[long_ind])
         long_ind += 1
 
-    server_args = dict((opt_to_names[opt_name],opt) for opt_name,opt in options)
+    server_args = dict((opt_to_names[opt_name], opt)
+                       for opt_name, opt in options)
     if 'help' in server_args:
         usage(out=sys.stdout)
     else:
         start_server(**server_args)
     sys.exit(0)
 
-def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY, \
+
+def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                  ca=None, port=DEFAULT_PORT, host=DEFAULT_HOST):
     try:
         port = int(port)
         error = False
 
         if not (0 <= port <= 65535):
-            print("Invalid port number",file=sys.stderr)
+            print("Invalid port number", file=sys.stderr)
             error = True
 
         if cert is None or not os.path.isfile(cert):
-            print("Invalid certificate file",file=sys.stderr)
+            print("Invalid certificate file", file=sys.stderr)
             if key is None:
-                print("There is no appropriate default certificate file.", \
+                print("There is no appropriate default certificate file.",
                       file=sys.stderr)
             error = True
 
         if key is None or not os.path.isfile(key):
             print("Invalid key file", file=sys.stderr)
             if key is None:
-                print("There is no appropriate default key file.", \
+                print("There is no appropriate default key file.",
                       file=sys.stderr)
             error = True
 
@@ -103,16 +108,29 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY, \
         usage()
         sys.exit(2)
 
-    print("Starting server at %s:%d\n"\
-          "Certificate: %s\tKey: %s%s" % \
-          (host, port, cert, key, '' if ca is None else '\tCA: %s'%ca),\
+    print("Starting server at %s:%d\n"
+          "Certificate: %s\tKey: %s%s" %
+          (host, port, cert, key, '' if ca is None else '\tCA: %s' % ca),
           file=sys.stderr)
 
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=ca)
     context.load_cert_chain(certfile=cert, keyfile=key)
 
-    bindsocket = socket.socket()
+    bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     bindsocket.bind((host, port))
     bindsocket.listen(5)
+    while True:
+        newsocket, fromaddr = bindsocket.accept()
+        try:
+            connstream = context.wrap_socket(newsocket, server_side=True)
+        except ssl.SSLEOFError:
+            print("Bad SSL connection")
+            continue
+
+        try:
+            print("Hello connection %s" % str(fromaddr))
+        finally:
+            connstream.shutdown(socket.SHUT_RDWR)
+            connstream.close()
 
 main(argv)
