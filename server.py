@@ -108,13 +108,11 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY, \
           (host, port, cert, key, '' if ca is None else '\tCA: %s'%ca),\
           file=sys.stderr)
 
-    return
-
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=ca)
     context.load_cert_chain(certfile=cert, keyfile=key)
 
     bindsocket = socket.socket()
-    bindsocket.bind((host, 10023))
+    bindsocket.bind((host, port))
     bindsocket.listen(5)
 
 main(argv)
