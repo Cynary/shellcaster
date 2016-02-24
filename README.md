@@ -1,5 +1,5 @@
-The Broadcaster
-===============
+ShellCaster
+===========
 
 Overview
 --------
@@ -83,7 +83,7 @@ signed certificates.
 
 During the filling out of information for your server certificate you will be
 asked to optionally fill out a password and optional company name. You are not
-required to do this.
+required to do this, and there
 
 Usage
 -----
