@@ -5,6 +5,18 @@
 # Then it just pipes the information coming from the server to bash.
 # If openssl dies/disconnects, then we just retry ad infinitum
 ROOT_CA_FILE="./rootCA.pem"
+case $# in
+    0)
+        echo "Need HOST:PORT as first argument"
+        ;;
+    1)
+        HOST=$1
+        ;;
+    *)
+        HOST=$1
+        ROOT_CA_FILE=$1
+        ;;
+esac
 
 # We will be using named FIFOs to talk with bash. Based on:
 # http://unix.stackexchange.com/questions/29851/shell-script-mktemp-whats-the-best-method-to-create-temporary-named-pipe

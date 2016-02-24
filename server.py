@@ -20,13 +20,13 @@ def usage(out=sys.stderr):
     global NAME
     print('''Usage:
     %s [-p --port port_number] [-c --cert certificate_file] [-k --key key_file] [-a --ca ca_file] [-h --help]
-    [-p\t--port\tPort number to bind to. Default is 601.]
-    -c\t--cert\tLocation of certificate file. Required if no default is set.
-    -k\t--key\tLocation of key file. Required if no default is set.
+    [-p\t--port\tPort number to bind to. Default is %d.]
+    [-c\t--cert\tLocation of certificate file.]
+    [-k\t--key\tLocation of key file.]
     [-a\t--ca\tLocation of Certificate Authority file.]
     [--host\tHost the server should bind to.]
-    -h\t--help\t
-''' % NAME, file=out)
+    [-h\t--help\tShow this help text.]
+''' % (DEFAULT_PORT, NAME), file=out)
 
 opt_to_names = {
     '-p': 'port',
