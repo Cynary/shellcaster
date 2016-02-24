@@ -7,9 +7,9 @@ import os
 import select
 
 DEFAULT_PORT = 6601
-DEFAULT_CAFILE = None
-DEFAULT_CERTFILE = None
-DEFAULT_KEY = None
+DEFAULT_CAFILE = "rootCA.pem"
+DEFAULT_CERTFILE = "confidential/server.crt"
+DEFAULT_KEY = "confidential/server.key"
 DEFAULT_HOST = ''
 
 NAME = sys.argv[0]
@@ -134,11 +134,11 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                     for c in connected:
                         c.send(bytes(message, 'UTF-8'))
                 elif r == bindsocket:
-                    print("Connection received.")
+                    print("Connection received.", file=sys.stderr)
                     try:
                         conn, fromaddr = bindsocket.accept()
                     except socket.error:
-                        print("Fast client there")
+                        print("Error on accept, ignoring.", file=sys.stderr)
                         continue
                     conn.setblocking(True)
                     try:
@@ -146,25 +146,24 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                         connected.add(ssl_conn)
                     except (ssl.SSLEOFError, ssl.SSLError,
                             ConnectionResetError):
-                        print("Bad SSL connection.")
+                        print("Bad SSL connection.", file=sys.stderr)
                 else:
-                    print("Data received from socket.")
+                    print("Data received from socket.", file=sys.stderr)
                     try:
                         o = r.read()
                     except ValueError:
                         print("This can rarely happen if someone closes "
-                              "connection during accept or handshake start.")
-                        print("Seems to be a bug with SSL or sockets.")
-                        print("We are just removing the socket from our queue "
-                              "in this case")
+                              "connection during accept or handshake start.\n"
+                              "Seems to be a bug with SSL or sockets.\n"
+                              "We are just removing the socket from our queue "
+                              "in this case", file=sys.stderr)
                         connected.remove(r)
                         continue
                     if o == b'':
-                        print("Socket closed connection.")
+                        print("Socket closed connection.", file=sys.stderr)
                         connected.remove(r)
                         r.shutdown(socket.SHUT_RDWR)
                         r.close()
-
     finally:
         print("Cleaning up connections.")
         for c in connected:
