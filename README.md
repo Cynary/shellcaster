@@ -125,7 +125,7 @@ Make sure you download the rootCA.pem file generated in the server to the same
 directory you're working in now.
 
 ```bash
-./client.sh broadcast.net
+./client.sh broadcast.net:6601
 ```
 
 You should now be able to control your computers remotely.
