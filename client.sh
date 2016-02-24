@@ -49,7 +49,7 @@ trap 'on_exit' EXIT
 
 while true
 do
-    ./client.py $HOST $ROOT_CA_FILE < "$tmpdir/sin" | bash > "$tmpdir/sin"
+    ./client.py $HOST $ROOT_CA_FILE < "$tmpdir/sin" | bash | tee "$tmpdir/sin"
     # Retry every second
     # Assumes temporary internet shortage.
     echo "Retrying"
