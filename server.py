@@ -28,28 +28,15 @@ def usage(out=sys.stderr):
     [-h\t--help\tShow this help text.]
 ''' % (DEFAULT_PORT, NAME), file=out)
 
-opt_to_names = {
-    '-p': 'port',
-    '-c': 'certfile',
-    '-k': 'key',
-    '-a': 'cafile',
-    '-h': 'help',
-    '--port': 'port',
-    '--cert': 'certfile',
-    '--ca': 'cafile',
-    '--key': 'key',
-    '--help': 'help'
-}
 SHORT_OPTIONS = 'p:c:a:k:h'
 LONG_OPTIONS = ['port=', 'cert=', 'ca=', 'key=', 'help', 'host=']
-
 
 def main(argv):
     try:
         options, argv = getopt.gnu_getopt(argv, SHORT_OPTIONS, LONG_OPTIONS)
     except getopt.GetoptError:
         usage()
-        sys.exit(2)
+        return 2
 
     def parse_opt(x):
         return x if x[-1] != '=' else x[:-1]
