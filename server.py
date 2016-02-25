@@ -140,6 +140,7 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                     except socket.error:
                         print("Error on accept, ignoring.", file=sys.stderr)
                         continue
+                    print("Connection came from %s." % str(fromaddr))
                     conn.setblocking(True)
                     try:
                         ssl_conn = context.wrap_socket(conn, server_side=True)
