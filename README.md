@@ -37,9 +37,9 @@ requirement was not a priority, so there is no stricter checking.
 Installing
 ----------
 
-To run the server and clients, you only need python's SSL library, and openssl
-installed. To create the certificates you only need openssl and pgp to encrypt
-an archive containing them.
+To run the server and clients, you only need python's SSL library, and other
+standard libraries. To create the certificates you only need openssl and pgp to
+encrypt an archive containing them.
 
 ### Installing Certificates
 
@@ -63,14 +63,13 @@ you do not need to create new certificates and may use those via the parameters:
 * `-k,--key key_file` specify an existing key file
 * `-a,--ca ca_file` specify an existing Certificate Authority (optional)
 
-The `./client.sh` script for your clients will use by default a file named
+The `./client.py` script for your clients will use by default a file named
 `rootCA.pem` in the same directory it's running from. It can be passed a
-different CA as an argument, however, it is simply the second argument it
-optionally gets (the first argument is the server host:port). For example, if
-you want to run it with customCA.pem as its Certificate Authority, you can do:
+different CA as an argument. For example, if you want to run it with
+customCA.pem as its Certificate Authority, you can do:
 
 ```bash
-./client.sh $HOST:$PORT customCA.pem
+./client.py -h $HOST -a customCA.pem
 ```
 
 If you need your certificate files that are in confidential back from the
@@ -102,16 +101,23 @@ Usage:
 [-h --help  Show this help text.]
 ```
 
-The `./client.sh` file simply sets up the piping between a simple python SSL
-client `./client.py` and bash. It also handles the cleanup of the pipes and
-the retrying mechanism. The logic should be easy to follow. It retries every
-second in case the connection fails, since it was designed to be deployed on
-machines whose network connection is prone to intermittent failure. If you
-generate your certificates using our `./install_certificates.sh` script, you
-should just copy the `rootCA.pem` file to the client machines. The `./client.sh`
-script is setup to connect to a server:port that it gets as its first argument
+The `./client.py` file has a help menu that displays all the options it
+supports:
 
-Future updates might see a move of logic from `./client.sh` to `./client.py`.
+```bash
+Usage:
+    ./client.py [-p --port port_number] -h,--host host [-a --ca ca_file] [--help]
+    [-p	--port	Port number on the server. By default, it is port 6601.]
+    -h	--host	Server's host. Could be name or IP. Required.
+    [-a	--ca	Location of Certificate Authority file. Default: rootCA.pem.]
+    [--help	Show this help text.]
+```
+
+The client retries ad infinitum if the network is failing (it is designed this
+way because the requirements of this project specified intermittent network
+connection on the client machines, and this should not be fatal). If you
+generate your certificates using our `./install_certificates.sh` script, you
+should just copy the `rootCA.pem` file to the client machines.
 
 If you want a quick start guide, you can get started with (assumes that the
 server's host is broadcast.net):
@@ -127,7 +133,7 @@ Make sure you download the rootCA.pem file generated in the server to the same
 directory you're working in now.
 
 ```bash
-./client.sh broadcast.net:6601
+./client.py -h broadcast.net
 ```
 
 You should now be able to control your computers remotely.

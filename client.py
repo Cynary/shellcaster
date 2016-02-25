@@ -10,12 +10,14 @@ import getopt
 
 NAME = sys.argv[0]
 argv = sys.argv[1:]
+DEFAULT_CAFILE='rootCA.pem'
+DEFAULT_PORT = 6601
 
 def usage(out=sys.stderr):
     global NAME
     print('''Usage:
-    %s -p,--port port_number -h,--host host [-a --ca ca_file] [-h --help]
-    -p\t--port\tPort number on the server. Required.
+    %s [-p --port port_number] -h,--host host [-a --ca ca_file] [--help]
+    [-p\t--port\tPort number on the server. By default, it is port 6601.]
     -h\t--host\tServer's host. Could be name or IP. Required.
     [-a\t--ca\tLocation of Certificate Authority file. Default: %s.]
     [--help\tShow this help text.]
@@ -53,16 +55,18 @@ def check_options(server_args):
     if 'help' in server_args:
         return 0
 
-    if 'host' not in server_args or 'port' not in server_args:
+    if 'host' not in server_args:
         return 2
-    try:
-        server_args['port'] = int(server_args['port'])
-        if not (0 <= server_args['port'] <= 65535):
-            print("Invalid port number", file=sys.stderr)
+
+    if 'port' in server_args:
+        try:
+            server_args['port'] = int(server_args['port'])
+            if not (0 <= server_args['port'] <= 65535):
+                print("Invalid port number", file=sys.stderr)
+                ret = 2
+        except ValueError:
+            print("Port number must be integer", file=sys.stderr)
             ret = 2
-    except ValueError:
-        print("Port number must be integer", file=sys.stderr)
-        ret = 2
 
     if ('ca' in server_args and not os.path.isfile(server_args['ca'])) \
        or not os.path.isfile(DEFAULT_CAFILE):
@@ -96,13 +100,12 @@ def main(argv):
         time.sleep(RETRY_WAIT)
     return 0
 
-DEFAULT_CAFILE='rootCA.pem'
 # From:
 # http://stackoverflow.com/questions/287871/print-in-terminal-with-colors-using-python
 SERVER_COLOR = '\033[01;31m'
 ENDC = '\033[0m'
 
-def run_server(comm, host, port, ca=DEFAULT_CAFILE):
+def run_server(comm, host, port=DEFAULT_PORT, ca=DEFAULT_CAFILE):
     context = ssl.create_default_context(cafile=ca)
     conn = context.wrap_socket(socket.socket(socket.AF_INET),
                                server_hostname=host)
