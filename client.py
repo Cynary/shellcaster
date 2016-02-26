@@ -7,6 +7,7 @@ import socket
 import select
 import sys
 import getopt
+import fcntl
 
 NAME = sys.argv[0]
 argv = sys.argv[1:]
@@ -92,8 +93,8 @@ def main(argv):
         except KeyboardInterrupt as e:
             print("Terminating")
             break
-        # except Exception as e:
-        #     print("Found exception:\n%s" % str(e))
+        except Exception as e:
+            print("Found exception:\n%s" % str(e))
         finally:
             bash_proc.kill()
         print("Retrying")
@@ -110,6 +111,13 @@ def run_server(comm, host, port=DEFAULT_PORT, ca=DEFAULT_CAFILE):
     conn = context.wrap_socket(socket.socket(socket.AF_INET),
                                server_hostname=host)
 
+    # Make stdout nonblocking.
+    # Sometimes select says there's output, but read fails.
+    # This makes it possible to handle those cases graciously.
+    fd = comm.stdout.fileno()
+    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
     conn.connect((host,port))
     try:
         while True:
@@ -124,7 +132,11 @@ def run_server(comm, host, port=DEFAULT_PORT, ca=DEFAULT_CAFILE):
                                      (SERVER_COLOR, ENDC))
                     sys.stdout.write(o.decode("utf-8"))
                 else:
-                    o = comm.stdout.readline()
+                    try:
+                        o = comm.stdout.readline()
+                    except OSError:
+                        # clear or reset for example get here, it's weird.
+                        continue
                     if (o == b''):
                         print("Bash has found an error, quit this connection")
                         return
