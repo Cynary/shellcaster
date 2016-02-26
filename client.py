@@ -133,4 +133,5 @@ def run_server(comm, host, port=DEFAULT_PORT, ca=DEFAULT_CAFILE):
     finally:
         conn.close()
 
-sys.exit(main(argv))
+if __name__ == '__main__':
+    sys.exit(main(argv))

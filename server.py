@@ -163,4 +163,5 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
             c.shutdown(socket.SHUT_RDWR)
             c.close()
 
-sys.exit(main(argv))
+if __name__ == '__main__':
+    sys.exit(main(argv))
