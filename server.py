@@ -127,7 +127,8 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                     except socket.error:
                         print("Error on accept, ignoring.", file=sys.stderr)
                         continue
-                    print("Connection came from %s." % str(fromaddr))
+                    print("Connection came from %s." % str(fromaddr),
+                          file=sys.stderr)
                     conn.setblocking(True)
                     try:
                         ssl_conn = context.wrap_socket(conn, server_side=True)
@@ -157,6 +158,8 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                         connected.remove(r)
                         r.shutdown(socket.SHUT_RDWR)
                         r.close()
+    except KeyboardInterrupt:
+        pass
     finally:
         print("Cleaning up connections.")
         for c in connected:
