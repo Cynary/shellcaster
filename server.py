@@ -105,6 +105,7 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
     context.load_cert_chain(certfile=cert, keyfile=key)
 
     bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    bindsocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     bindsocket.setblocking(False)
     bindsocket.bind((host, port))
     bindsocket.listen(5)
@@ -139,7 +140,7 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
                 else:
                     print("Data received from socket.", file=sys.stderr)
                     try:
-                        o = r.read()
+                        o = r.recv()
                     except ValueError:
                         print("This can rarely happen if someone closes "
                               "connection during accept or handshake start.\n"
@@ -165,6 +166,7 @@ def start_server(cert=DEFAULT_CERTFILE, key=DEFAULT_KEY,
         for c in connected:
             c.shutdown(socket.SHUT_RDWR)
             c.close()
+        bindsocket.close()
 
 if __name__ == '__main__':
     sys.exit(main(argv))
